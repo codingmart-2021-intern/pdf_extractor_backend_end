@@ -15,12 +15,12 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name="pdf")
+@Table(name = "pdf")
 public class Pdf {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="pdf_id")
+    @Column(name = "pdf_id")
     private Long pdf_id;
 
     @Column(name = "url", nullable = false)
@@ -30,8 +30,11 @@ public class Pdf {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "pdf")
+    @OneToMany(mappedBy = "pdf", cascade = CascadeType.ALL)
     private List<Pages> pages;
+
+    @OneToMany(mappedBy = "pdf", cascade = CascadeType.ALL)
+    private List<Category> categories;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

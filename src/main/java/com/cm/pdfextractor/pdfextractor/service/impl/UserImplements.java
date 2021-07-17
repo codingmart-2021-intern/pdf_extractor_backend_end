@@ -3,6 +3,7 @@ package com.cm.pdfextractor.pdfextractor.service.impl;
 import com.cm.pdfextractor.pdfextractor.model.User;
 import com.cm.pdfextractor.pdfextractor.repository.UserRepository;
 import com.cm.pdfextractor.pdfextractor.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class UserImplements implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     // find user by d
     @Override
@@ -44,7 +48,7 @@ public class UserImplements implements UserService {
     // signup
     @Override
     public ResponseEntity<?> addData(User user) throws Exception {
-
+        System.out.println("user = " + objectMapper.writeValueAsString(user));
         User existData = userRepository.findByEmail(user.getEmail());
 
         if (existData != null) {

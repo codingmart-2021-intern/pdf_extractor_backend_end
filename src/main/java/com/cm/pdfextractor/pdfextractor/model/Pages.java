@@ -25,7 +25,7 @@ public class Pages {
     @Column(name="page_number", nullable = false)
     private Long page_number;
 
-    @Column(name="page_content")
+    @Lob
     private String content;
 
     @ManyToOne
