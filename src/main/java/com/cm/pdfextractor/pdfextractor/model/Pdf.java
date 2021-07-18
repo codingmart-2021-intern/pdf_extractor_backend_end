@@ -23,6 +23,8 @@ public class Pdf {
     @Column(name = "pdf_id")
     private Long pdf_id;
 
+    private String fileName;
+
     @Column(name = "url", nullable = false)
     private String url;
 

@@ -132,6 +132,8 @@ public class PdfImplements implements PdfService {
     }
 
 
+
+
     public boolean cleanUpFolder(int arr[], String path) throws IOException {
         try {
             // delete merged file
