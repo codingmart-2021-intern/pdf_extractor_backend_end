@@ -59,10 +59,20 @@ public class PdfImplements implements PdfService {
         PDFmerger.setDestinationFileName(destinationDir + "merged.pdf");
 
         int arr[] = pageNoModel.getPageNos();
+        Set<Integer> set = new LinkedHashSet<>();
+
         for (int i = 0; i < arr.length; i++) {
-            PDDocument pd = Pages.get(arr[i]);
-            pd.save(destinationDir + arr[i] + ".pdf");
-            File file = new File(destinationDir + arr[i] + ".pdf");
+            set.add(arr[i]);
+        }
+        int a[] = new int[set.size()];
+        int temp = 0;
+        for (Integer i : set) {
+            a[temp++] = i;
+        }
+        for (int i = 0; i < a.length; i++) {
+            PDDocument pd = Pages.get(a[i]);
+            pd.save(destinationDir + a[i] + ".pdf");
+            File file = new File(destinationDir + a[i] + ".pdf");
             PDFmerger.addSource(file);
             pd.close();
         }
@@ -72,13 +82,13 @@ public class PdfImplements implements PdfService {
 
         byte[] byteData = Files.readAllBytes(Paths.get(destinationDir + "merged.pdf"));
 
-        boolean isCleaned = cleanUpFolder(arr, destinationDir);
+        boolean isCleaned = cleanUpFolder(a, destinationDir);
         if (!isCleaned) throw new Exception("Error in cleaningup folder");
         return byteData;
     }
 
     @Override
-    public PdfDownloadModel categoryPdf(PdfCategoryModel categories) throws Exception{
+    public PdfDownloadModel categoryPdf(PdfCategoryModel categories) throws Exception {
 
         Optional<Pdf> fetchedPdf = pdfRepository.findById(categories.getPdfId());
 
@@ -86,19 +96,20 @@ public class PdfImplements implements PdfService {
         List<Pages> pagesData = pdfDetails.getPages();
         List<Long> categoryPages = new ArrayList<Long>();
 
-        for(int i = 0 ; i < pagesData.size() ; i++){
+        for (int i = 0; i < pagesData.size(); i++) {
 
             String content = pagesData.get(i).getContent();
             String[] categoryList = categories.getCategories();
-            for (int j = 0 ; j < categoryList.length ; j++) {
+            for (int j = 0; j < categoryList.length; j++) {
                 if (content
                         .replaceAll("\n", "")
                         .toLowerCase()
                         .contains(
-                            categoryList[j].toLowerCase()
+                                categoryList[j].toLowerCase()
                         )
-                    ) {
+                ) {
                     categoryPages.add(pagesData.get(i).getPage_number());
+                    System.out.println("pagesData.get(i).getPage_number() = " + pagesData.get(i).getPage_number());
                 }
             }
         }
@@ -107,8 +118,8 @@ public class PdfImplements implements PdfService {
         PdfDownloadModel pages = new PdfDownloadModel();
         int[] arr = new int[categoryPages.size()];
 
-        for(int i = 0 ; i < categoryPages.size() ; i++){
-            arr[i] = Integer.parseInt(categoryPages.get(i)+"");
+        for (int i = 0; i < categoryPages.size(); i++) {
+            arr[i] = Integer.parseInt(categoryPages.get(i) + "");
         }
 
         pages.setPdfId(categories.getPdfId());
@@ -126,15 +137,15 @@ public class PdfImplements implements PdfService {
 
         List<Pages> pages = fetchPdf.get().getPages();
 
-        for (int i = 0 ; i < pages.size() ; i++){
+        for (int i = 0; i < pages.size(); i++) {
             String content = pages.get(i).getContent();
 
-            if( content.toLowerCase().contains(new String("Clients By Industry").toLowerCase()) ) {
+            if (content.toLowerCase().contains(new String("Clients By Industry").toLowerCase())) {
                 System.out.println(content);
                 String[] spl = content.split("\n");
-                for (int j = 0 ; j < spl.length ; j++) {
+                for (int j = 0; j < spl.length; j++) {
 
-                    if( !spl[j].toLowerCase().contains(new String("Clients By Industry").toLowerCase()) )
+                    if (!spl[j].toLowerCase().contains(new String("Clients By Industry").toLowerCase()))
                         categories.add(spl[j]);
                 }
             }
@@ -190,8 +201,6 @@ public class PdfImplements implements PdfService {
     public Pdf findById(Long id) throws Exception {
         return pdfRepository.findById(id).orElseThrow(() -> new Exception("Pdf id not found"));
     }
-
-
 
 
     public boolean cleanUpFolder(int arr[], String path) throws IOException {
