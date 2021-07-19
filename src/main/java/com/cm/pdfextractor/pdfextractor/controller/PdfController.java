@@ -1,6 +1,8 @@
 package com.cm.pdfextractor.pdfextractor.controller;
 
+import com.cm.pdfextractor.pdfextractor.model.ErrorResponse;
 import com.cm.pdfextractor.pdfextractor.model.Pdf;
+import com.cm.pdfextractor.pdfextractor.model.PdfCategoryModel;
 import com.cm.pdfextractor.pdfextractor.model.PdfDownloadModel;
 import com.cm.pdfextractor.pdfextractor.service.PdfService;
 import lombok.Getter;
@@ -31,6 +33,36 @@ public class PdfController {
         return new ResponseEntity<>(content, headers, HttpStatus.OK);
     }
 
+    @PostMapping("/category")
+    private ResponseEntity<?> categoryPdf(@RequestBody PdfCategoryModel categories) throws Exception {
+
+        Pdf fetchedPdf = pdfService.findById(categories.getPdfId());
+
+        if( fetchedPdf.getPdf_id() >= 0 ){
+            PdfDownloadModel pages = pdfService.categoryPdf(categories);
+
+            byte[] content = pdfService.downloadPdf(pages);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            // Here you have to set the actual filename of your pdf
+            String filename = "output.pdf";
+            headers.setContentDispositionFormData(filename, filename);
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+        }
+        else {
+
+            ErrorResponse errorResponse = new ErrorResponse(false,"Pdf not found");
+            return new ResponseEntity<>(errorResponse,HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/categorieslist/{pdfid}")
+    private ResponseEntity<?> getCategoriesList(@PathVariable Long pdfid) throws Exception {
+
+        return new ResponseEntity<>(pdfService.getCategoriesList(pdfid),HttpStatus.OK);
+    }
+
     @GetMapping("/getAllPages")
     private ResponseEntity<?> getAllPagesInPdf() throws Exception {
         return new ResponseEntity<>(pdfService.listAllPagesInPdf(), HttpStatus.OK);
@@ -50,5 +82,8 @@ public class PdfController {
     private ResponseEntity<?> findById(@PathVariable Long id) throws Exception {
         return new ResponseEntity<>(pdfService.findById(id), HttpStatus.CREATED);
     }
+
+
+
 
 }
