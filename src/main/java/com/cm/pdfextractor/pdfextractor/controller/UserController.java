@@ -40,15 +40,14 @@ public class UserController {
         log.info("UserResourceImpl : authenticate");
 
         JSONObject jsonObject = new JSONObject();
-
         User res_data = userService.findByEmail(user.getEmail());
-
+        System.out.println(res_data.getEmail());
         if (res_data == null) {
             return new ResponseEntity<String>(
                     userService.returnJsonString(false, "your data is not found in database"),
                     HttpStatus.NOT_FOUND);
         }
-
+        System.out.println(res_data.getEmail());
         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
         try {
@@ -59,7 +58,7 @@ public class UserController {
             jsonObject.put("name", user_data.getName());
             jsonObject.put("email", user_data.getEmail());
             jsonObject.put("token", tokenProvider.createToken(email, user_data.getName()));
-
+            System.out.println(res_data.getEmail());
         } catch (JSONException e) {
             e.printStackTrace();
         }

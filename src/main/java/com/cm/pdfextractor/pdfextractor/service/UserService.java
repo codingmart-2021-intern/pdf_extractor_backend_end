@@ -11,6 +11,7 @@ public interface UserService {
     ResponseEntity<User> findById(Long id);
 
     User findByEmail(String email);
+
     List<User> findAll();
 
     ResponseEntity<?> addData(User user) throws Exception;

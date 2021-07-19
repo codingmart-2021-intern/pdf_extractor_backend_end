@@ -1,9 +1,6 @@
 package com.cm.pdfextractor.pdfextractor.service.impl;
 
-import com.cm.pdfextractor.pdfextractor.model.Pages;
-import com.cm.pdfextractor.pdfextractor.model.Pdf;
-import com.cm.pdfextractor.pdfextractor.model.PdfDownloadModel;
-import com.cm.pdfextractor.pdfextractor.model.User;
+import com.cm.pdfextractor.pdfextractor.model.*;
 import com.cm.pdfextractor.pdfextractor.repository.PagesRepository;
 import com.cm.pdfextractor.pdfextractor.repository.PdfRepository;
 import com.cm.pdfextractor.pdfextractor.repository.UserRepository;
@@ -26,10 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +75,72 @@ public class PdfImplements implements PdfService {
         boolean isCleaned = cleanUpFolder(arr, destinationDir);
         if (!isCleaned) throw new Exception("Error in cleaningup folder");
         return byteData;
+    }
+
+    @Override
+    public PdfDownloadModel categoryPdf(PdfCategoryModel categories) throws Exception{
+
+        Optional<Pdf> fetchedPdf = pdfRepository.findById(categories.getPdfId());
+
+        Pdf pdfDetails = fetchedPdf.get();
+        List<Pages> pagesData = pdfDetails.getPages();
+        List<Long> categoryPages = new ArrayList<Long>();
+
+        for(int i = 0 ; i < pagesData.size() ; i++){
+
+            String content = pagesData.get(i).getContent();
+            String[] categoryList = categories.getCategories();
+            for (int j = 0 ; j < categoryList.length ; j++) {
+                if (content
+                        .replaceAll("\n", "")
+                        .toLowerCase()
+                        .contains(
+                            categoryList[j].toLowerCase()
+                        )
+                    ) {
+                    categoryPages.add(pagesData.get(i).getPage_number());
+                }
+            }
+        }
+
+        Collections.sort(categoryPages);
+        PdfDownloadModel pages = new PdfDownloadModel();
+        int[] arr = new int[categoryPages.size()];
+
+        for(int i = 0 ; i < categoryPages.size() ; i++){
+            arr[i] = Integer.parseInt(categoryPages.get(i)+"");
+        }
+
+        pages.setPdfId(categories.getPdfId());
+        pages.setPageNos(arr);
+
+        return pages;
+    }
+
+    @Override
+    public List<String> getCategoriesList(Long pdfId) throws Exception {
+
+        List<String> categories = new ArrayList<String>();
+
+        Optional<Pdf> fetchPdf = pdfRepository.findById(pdfId);
+
+        List<Pages> pages = fetchPdf.get().getPages();
+
+        for (int i = 0 ; i < pages.size() ; i++){
+            String content = pages.get(i).getContent();
+
+            if( content.toLowerCase().contains(new String("Clients By Industry").toLowerCase()) ) {
+                System.out.println(content);
+                String[] spl = content.split("\n");
+                for (int j = 0 ; j < spl.length ; j++) {
+
+                    if( !spl[j].toLowerCase().contains(new String("Clients By Industry").toLowerCase()) )
+                        categories.add(spl[j]);
+                }
+            }
+        }
+
+        return categories;
     }
 
     //    not using--
